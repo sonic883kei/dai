@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>○×クイズ 問題演習ポータル</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --card: #222536;
+    --border: #2e3248;
+    --accent: #5b8ef0;
+    --accent2: #7c5cf5;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+    --text: #e8eaf0;
+    --sub: #8b90aa;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  header {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  header h1 { font-size: 24px; color: var(--text); }
+
+  .container {
+    width: 100%;
+    max-width: 800px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .screen { display: none; }
+  .active { display: block; }
+
+  /* ===== ポータル（設定）画面 ===== */
+  .setting-group { margin-bottom: 24px; }
+  .setting-label {
+    font-size: 14px;
+    color: var(--sub);
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  .grid-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  .grid-subjects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .option-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  .option-btn:hover { border-color: var(--accent); }
+  .option-btn.selected {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent;
+    color: #ffffff;
+  }
+
+  .start-btn-container { text-align: center; margin-top: 32px; }
+  .primary-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #ffffff;
+    border: none;
+    padding: 16px 48px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(124, 92, 245, 0.4);
+    transition: transform 0.2s;
+  }
+  .primary-btn:hover { transform: translateY(-2px); }
+
+  /* ===== クイズ画面 ===== */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    color: var(--sub);
+    font-size: 14px;
+  }
+  .progress-container {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .question-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    min-height: 140px;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+  }
+  .ox-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .ox-btn {
+    height: 100px;
+    font-size: 48px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: #ffffff;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .ox-btn:active { transform: scale(0.98); }
+  .btn-o { background: var(--correct); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3); }
+  .btn-x { background: var(--wrong); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3); }
+  .ox-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ===== フィードバック・解説 ===== */
+  .feedback-box {
+    display: none;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border-left: 6px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .feedback-box.correct { border-left-color: var(--correct); }
+  .feedback-box.wrong { border-left-color: var(--wrong); }
+  .feedback-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+  .feedback-box.correct .feedback-title { color: var(--correct); }
+  .feedback-box.wrong .feedback-title { color: var(--wrong); }
+  .explanation-text { font-size: 15px; line-height: 1.6; color: #d1d5db; }
+
+  /* ===== 結果画面 ===== */
+  .result-screen { text-align: center; }
+  .result-score { font-size: 64px; font-weight: bold; margin: 16px 0; color: var(--accent); }
+  .result-eval { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
+  .result-detail { color: var(--sub); margin-bottom: 32px; }
+  .result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+  .secondary-btn {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .secondary-btn:hover { background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="app-title">○×クイズ 演習システム</h1>
+</header>
+
+<div class="container">
+  
+  <div id="portal-screen" class="screen active">
+    <div class="setting-group">
+      <div class="setting-label">演習科目を選択</div>
+      <div class="grid-subjects" id="subject-selector">
+        <div class="option-btn" data-subject="seiji">政治</div>
+        <div class="option-btn" data-subject="keizai">経済</div>
+        <div class="option-btn" data-subject="sekaihi">世界史</div>
+        <div class="option-btn" data-subject="nihonshi">日本史</div>
+        <div class="option-btn" data-subject="chiri">地理</div>
+        <div class="option-btn" data-subject="seibutsu">生物</div>
+        <div class="option-btn" data-subject="chigaku">地学</div>
+        <div class="option-btn" data-subject="kagaku">化学</div>
+        <div class="option-btn" data-subject="shisou">思想</div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">出題問題数</div>
+      <div class="grid-options" id="count-selector">
+        <div class="option-btn selected" data-count="10">10問</div>
+        <div class="option-btn" data-count="20">20問</div>
+        <div class="option-btn" data-count="30">30問</div>
+        <div class="option-btn" data-count="50">50問</div>
+        <div class="option-btn" data-count="all">全問</div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">出題順序</div>
+      <div class="grid-options" id="order-selector">
+        <div class="option-btn selected" data-order="random">ランダム</div>
+        <div class="option-btn" data-order="sequence">順番通り</div>
+      </div>
+    </div>
+
+    <div class="start-btn-container">
+      <button class="primary-btn" onclick="loadAndStartQuiz()">演習を開始する</button>
+    </div>
+  </div>
+
+  <div id="quiz-screen" class="screen">
+    <div class="quiz-header">
+      <span id="quiz-title-display">科目: 未選択</span>
+      <span id="progress-text">0 / 0 問</span>
+    </div>
+    <div class="progress-container">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+
+    <div class="question-box" id="question-text">
+      問題文がここに表示されます。
+    </div>
+
+    <div class="ox-container">
+      <button class="ox-btn btn-o" onclick="handleAnswer('○')">○</button>
+      <button class="ox-btn btn-x" onclick="handleAnswer('×')">×</button>
+    </div>
+
+    <div id="feedback-box" class="feedback-box">
+      <div id="feedback-title" class="feedback-title">正解！</div>
+      <div id="explanation-text" class="explanation-text">解説文がここに表示されます。</div>
+      <div style="text-align: right; margin-top: 16px;">
+        <button class="primary-btn" style="padding: 10px 24px; font-size: 14px;" onclick="nextQuestion()">次へ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="result-screen" class="screen result-screen">
+    <div style="font-size: 18px; color: var(--sub);">演習終了</div>
+    <div class="result-score" id="result-pct">0%</div>
+    <div class="result-eval" id="result-title">ここに評価</div>
+    <div class="result-detail" id="result-sub">0 / 0 問正解</div>
+
+    <div class="result-actions">
+      <button class="secondary-btn" onclick="backToPortal()">科目選択へ戻る</button>
+      <button class="primary-btn" onclick="retryQuiz()">同じ設定で再挑戦</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // 状態管理変数
+  let selectedSubject = "";
+  let selectedCount = "10";
+  let selectedOrder = "random";
+
+  let masterQuestions = []; // 読み込んだ科目の全問題
+  let testPool = [];        // 抽出・調整後の出題用プール
+  let currentIdx = 0;
+  let correctCount = 0;
+
+  // 初期化：選択ロジックのイベントリスナー設定
+  document.addEventListener("DOMContentLoaded", () => {
+    setupSelector("subject-selector", (val) => { selectedSubject = val; });
+    setupSelector("count-selector", (val) => { selectedCount = val; });
+    setupSelector("order-selector", (val) => { selectedOrder = val; });
+  });
+
+  function setupSelector(containerId, callback) {
+    const container = document.getElementById(containerId);
+    container.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("option-btn")) return;
+      container.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
+      e.target.classList.add("selected");
+      callback(e.target.dataset[Object.keys(e.target.dataset)[0]]);
+    });
+    // 初期選択状態の取得
+    const initialSelected = container.querySelector(".option-btn.selected");
+    if (initialSelected) {
+      callback(initialSelected.dataset[Object.keys(initialSelected.dataset)[0]]);
+    }
+  }
+
+  // 非同期処理：JSONデータのフェッチとクイズの組み立て
+  async function loadAndStartQuiz() {
+    if (!selectedSubject) {
+      alert("演習を行う科目を選択してください。");
+      return;
+    }
+
+    try {
+      // 例: 'seiji.json' を読み込む
+      const response = await fetch(`${selectedSubject}.json`);
+      if (!response.ok) throw new Error("データの読み込みに失敗しました。");
+      
+      masterQuestions = await response.json();
+      
+      if (!masterQuestions || masterQuestions.length === 0) {
+        alert("該当科目の問題データが空です。");
+        return;
+      }
+
+      initQuizPool();
+    } catch (error) {
+      console.error(error);
+      alert(`エラー: 科目データ（${selectedSubject}.json）が見つからないか、読み込めませんでした。 Webサーバー上で実行してください。`);
+    }
+  }
+
+  // クイズ用プールの構築（シャッフルおよび問題数制限）
+  function initQuizPool() {
+    let pool = [...masterQuestions];
+
+    // 配列のシャッフル（ランダム）
+    if (selectedOrder === "random") {
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+    }
+
+    // 出題数の切り出し
+    if (selectedCount !== "all") {
+      const limit = parseInt(selectedCount, 10);
+      pool = pool.slice(0, limit);
+    }
+
+    testPool = pool;
+    currentIdx = 0;
+    correctCount = 0;
+
+    // 画面遷移
+    document.getElementById("portal-screen").classList.remove("active");
+    document.getElementById("quiz-screen").classList.add("active");
+    
+    // 表示更新
+    const subjectText = document.querySelector(`#subject-selector [data-subject="${selectedSubject}"]`).textContent;
+    document.getElementById("quiz-title-display").textContent = `科目: ${subjectText}`;
+
+    showQuestion();
+  }
+
+  // 問題表示
+  function showQuestion() {
+    // フィードバック領域を隠し、〇×ボタンを有効化
+    document.getElementById("feedback-box").style.display = "none";
+    toggleOXButtons(true);
+
+    const qNum = currentIdx + 1;
+    document.getElementById("progress-text").textContent = `${qNum} / ${testPool.length} 問`;
+    
+    const pct = (currentIdx / testPool.length) * 100;
+    document.getElementById("progress-fill").style.width = `${pct}%`;
+
+    document.getElementById("question-text").textContent = testPool[currentIdx].q;
+  }
+
+  // 〇×ボタン制御
+  function toggleOXButtons(enabled) {
+    document.querySelectorAll(".ox-btn").forEach(btn => btn.disabled = !enabled);
+  }
+
+  // 解答判定処理
+  function handleAnswer(userAns) {
+    toggleOXButtons(false); // 重複クリック防止
+    
+    const currentQ = testPool[currentIdx];
+    const isCorrect = (userAns === currentQ.a);
+
+    if (isCorrect) correctCount++;
+
+    // フィードバック表示の更新
+    const fbBox = document.getElementById("feedback-box");
+    const fbTitle = document.getElementById("feedback-title");
+    const fbExpl = document.getElementById("explanation-text");
+
+    fbBox.className = "feedback-box " + (isCorrect ? "correct" : "wrong");
+    fbTitle.textContent = isCorrect ? "解 正解！" : "不解 不正解...";
+    fbExpl.textContent = currentQ.ex || "解説はありません。";
+    
+    fbBox.style.display = "block";
+  }
+
+  // 次へ進む、または終了処理
+  function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < testPool.length) {
+      showQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  // 結果表示画面
+  function showResult() {
+    document.getElementById("quiz-screen").classList.remove("active");
+    document.getElementById("result-screen").classList.add("active");
+
+    // 進捗バーを100%に
+    document.getElementById("progress-fill").style.width = "100%";
+
+    const pct = Math.round((correctCount / testPool.length) * 100);
+    document.getElementById("result-pct").textContent = pct + "%";
+
+    let title = "";
+    let sub = `正解数: ${correctCount} / ${testPool.length} 問`;
+
+    // 客観的かつ段階的なスコア評価
+    if (pct >= 90) { title = "優秀（合格圏内）"; }
+    else if (pct >= 70) { title = "良好（標準レベル）"; }
+    else if (pct >= 50) { title = "要復習（知識定着不足）"; }
+    else { title = "基礎確認（テキストの再読が必要です）"; }
+
+    document.getElementById("result-title").textContent = title;
+    document.getElementById("result-sub").textContent = sub;
+  }
+
+  // ポータルへ戻る
+  function backToPortal() {
+    document.getElementById("result-screen").classList.remove("active");
+    document.getElementById("portal-screen").classList.add("active");
+  }
+
+  // 同じ条件でリトライ
+  function retryQuiz() {
+    document.getElementById("result-screen").classList.remove("active");
+    initQuizPool();
+  }
+</script>
+</body>
+</html>
