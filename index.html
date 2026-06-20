@@ -198,12 +198,56 @@
     transition: background 0.2s;
   }
   .secondary-btn:hover { background: var(--border); }
+
+  /* ===== 得点履歴 ===== */
+  .history-section {
+    margin-top: 36px;
+    text-align: left;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .history-header .setting-label { margin-bottom: 0; }
+  .history-clear-btn {
+    background: none;
+    border: none;
+    color: var(--sub);
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .history-clear-btn:hover { color: var(--wrong); }
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .history-table th, .history-table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-table th {
+    color: var(--sub);
+    font-weight: bold;
+    font-size: 12px;
+  }
+  .history-empty {
+    color: var(--sub);
+    font-size: 14px;
+    padding: 12px 0;
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1 id="app-title">知識分野　○× 演習</h1>
+  <h1 id="app-title">○×クイズ 演習システム</h1>
 </header>
 
 <div class="container">
@@ -285,6 +329,14 @@
       <button class="secondary-btn" onclick="backToPortal()">科目選択へ戻る</button>
       <button class="primary-btn" onclick="retryQuiz()">同じ設定で再挑戦</button>
     </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        <div class="setting-label">直近の得点記録（最大10件）</div>
+        <button class="history-clear-btn" onclick="clearHistory()">記録を削除</button>
+      </div>
+      <div id="history-container"></div>
+    </div>
   </div>
 
 </div>
@@ -299,6 +351,78 @@
   let testPool = [];        // 抽出・調整後の出題用プール
   let currentIdx = 0;
   let correctCount = 0;
+
+  // ===== 得点履歴（localStorage） =====
+  const HISTORY_KEY = "quizScoreHistory";
+  const HISTORY_MAX = 10;
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.error("履歴の読み込みに失敗しました。", e);
+      return [];
+    }
+  }
+
+  function saveHistoryRecord(record) {
+    try {
+      const history = loadHistory();
+      history.unshift(record);          // 新しい記録を先頭に追加
+      const trimmed = history.slice(0, HISTORY_MAX); // 最大10件に制限
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    } catch (e) {
+      console.error("履歴の保存に失敗しました。", e);
+    }
+  }
+
+  function clearHistory() {
+    if (!confirm("保存されている得点記録をすべて削除します。よろしいですか？")) return;
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const container = document.getElementById("history-container");
+    const history = loadHistory();
+
+    if (history.length === 0) {
+      container.innerHTML = `<div class="history-empty">まだ記録がありません。</div>`;
+      return;
+    }
+
+    const rows = history.map(r => `
+      <tr>
+        <td>${escapeHtml(r.date)}</td>
+        <td>${escapeHtml(r.subjectLabel)}</td>
+        <td>${r.correct} / ${r.total}</td>
+        <td>${r.pct}%</td>
+      </tr>
+    `).join("");
+
+    container.innerHTML = `
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>日時</th>
+            <th>科目</th>
+            <th>正答数/問題数</th>
+            <th>正答率</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  // 簡易エスケープ（科目名表示などXSS対策）
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
 
   // 初期化：選択ロジックのイベントリスナー設定
   document.addEventListener("DOMContentLoaded", () => {
@@ -416,7 +540,7 @@
     const fbExpl = document.getElementById("explanation-text");
 
     fbBox.className = "feedback-box " + (isCorrect ? "correct" : "wrong");
-    fbTitle.textContent = isCorrect ? "正解！すばらしい！" : "残念　不正解...";
+    fbTitle.textContent = isCorrect ? "解 正解！" : "不解 不正解...";
     fbExpl.textContent = currentQ.ex || "解説はありません。";
     
     fbBox.style.display = "block";
@@ -447,13 +571,24 @@
     let sub = `正解数: ${correctCount} / ${testPool.length} 問`;
 
     // 客観的かつ段階的なスコア評価
-    if (pct >= 90) { title = "優秀（ほぼ定着）"; }
+    if (pct >= 90) { title = "優秀（合格圏内）"; }
     else if (pct >= 70) { title = "良好（標準レベル）"; }
     else if (pct >= 50) { title = "要復習（知識定着不足）"; }
     else { title = "基礎確認（テキストの再読が必要です）"; }
 
     document.getElementById("result-title").textContent = title;
     document.getElementById("result-sub").textContent = sub;
+
+    // 得点記録を保存
+    const subjectLabel = document.querySelector(`#subject-selector [data-subject="${selectedSubject}"]`)?.textContent || selectedSubject;
+    saveHistoryRecord({
+      date: new Date().toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }),
+      subjectLabel: subjectLabel,
+      correct: correctCount,
+      total: testPool.length,
+      pct: pct
+    });
+    renderHistory();
   }
 
   // ポータルへ戻る
