@@ -229,7 +229,7 @@
     font-size: 14px;
   }
   .history-table th, .history-table td {
-    padding: 8px 10px;
+    padding: 12px 10px;
     text-align: left;
     border-bottom: 1px solid var(--border);
   }
@@ -237,6 +237,17 @@
     color: var(--sub);
     font-weight: bold;
     font-size: 12px;
+  }
+  /* 🌟 行をタップ可能にデザイン */
+  .history-row {
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+  .history-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .history-row:active {
+    background: rgba(255, 255, 255, 0.08);
   }
   .history-empty {
     color: var(--sub);
@@ -395,6 +406,65 @@
     font-size: 18px;
     height: 300px;
   }
+
+  /* 🌟 新機能：詳細ポップアップ（モーダル）用の追加スタイル */
+  .detail-modal-dialog {
+    background: #11141d;
+    width: 95%;
+    max-width: 600px;
+    max-height: 85vh;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .detail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+  .detail-modal-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .detail-question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .detail-question-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .detail-answer-box {
+    font-size: 13px;
+    color: var(--correct);
+    font-weight: bold;
+    margin-bottom: 6px;
+    padding-left: 20px;
+  }
+  .detail-explanation-box {
+    font-size: 12px;
+    color: var(--sub);
+    border-top: 1px dashed var(--border);
+    padding-top: 8px;
+    margin-top: 6px;
+    padding-left: 20px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -411,7 +481,7 @@
       <div class="grid-subjects" id="subject-selector">
         <div class="option-btn" data-subject="seiji">政治</div>
         <div class="option-btn" data-subject="keizai">経済</div>
-        <div class="option-btn" data-subject="sekaihi">世界史</div>
+        <div class="option-btn" data-subject="sekaishi">世界史</div>
         <div class="option-btn" data-subject="nihonshi">日本史</div>
         <div class="option-btn" data-subject="chiri">地理</div>
         <div class="option-btn" data-subject="seibutsu">生物</div>
@@ -486,7 +556,7 @@
 
     <div class="history-section">
       <div class="history-header">
-        <div class="setting-label">直近の得点記録（最大10件）</div>
+        <div class="setting-label">直近の得点記録（最大10件 / タップして間違えた問題を確認）</div>
         <button class="history-clear-btn" onclick="clearHistory()">記録を削除</button>
       </div>
       <div id="history-container"></div>
@@ -522,6 +592,25 @@
 
     <button id="auth-submit-btn" class="auth-submit-btn" onclick="submitPin()">認証する</button>
     <div id="auth-error-text" class="auth-error-text">暗証番号が正しくありません</div>
+  </div>
+</div>
+
+<!-- 🌟 新機能：詳細ポップアップ（モーダル画面） -->
+<div id="detail-modal" class="auth-overlay" style="display: none;">
+  <div class="detail-modal-dialog">
+    <div class="detail-modal-header">
+      <div>
+        <h3 style="font-size: 18px; font-weight: bold; color: #ffffff;" id="detail-modal-subject">科目名</h3>
+        <p id="detail-modal-date" style="font-size: 11px; color: var(--sub); margin-top: 4px;">実施日時</p>
+      </div>
+      <button onclick="closeDetailModal()" style="background: none; border: none; color: var(--sub); font-size: 24px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--sub)'">&times;</button>
+    </div>
+    <div class="detail-modal-body" id="detail-modal-content">
+      <!-- ここに間違えた問題一覧が動的に挿入されます -->
+    </div>
+    <div style="text-align: right; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+      <button class="secondary-btn" style="padding: 10px 24px; font-size: 14px;" onclick="closeDetailModal()">閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -604,6 +693,7 @@
   let testPool = [];        // 抽出・調整後の出題用プール
   let currentIdx = 0;
   let correctCount = 0;
+  let sessionWrongQuestions = []; // 🌟 今回の演習で「できなかった」問題の保存用
 
   // ===== 得点履歴（localStorage） =====
   const HISTORY_KEY = "quizScoreHistory";
@@ -646,8 +736,9 @@
       return;
     }
 
-    const rows = history.map(r => `
-      <tr>
+    // 🌟 行をタップ可能にし、onclickにモーダル表示を紐付け
+    const rows = history.map((r, idx) => `
+      <tr class="history-row" onclick="openDetailModal(${idx})">
         <td>${escapeHtml(r.date)}</td>
         <td>${escapeHtml(r.subjectLabel)}</td>
         <td>${r.correct} / ${r.total}</td>
@@ -668,6 +759,61 @@
         <tbody>${rows}</tbody>
       </table>
     `;
+  }
+
+  // 🌟 新機能：間違えた問題の一覧をポップアップで表示
+  function openDetailModal(idx) {
+    const history = loadHistory();
+    const record = history[idx];
+    if (!record) return;
+
+    document.getElementById("detail-modal-subject").textContent = record.subjectLabel + " の詳細結果";
+    document.getElementById("detail-modal-date").textContent = "実施日時: " + record.date + " | 正解率: " + record.pct + "% (" + record.correct + " / " + record.total + "問)";
+
+    const contentArea = document.getElementById("detail-modal-content");
+    contentArea.innerHTML = "";
+
+    const wrongList = record.wrongQuestions || [];
+
+    if (wrongList.length === 0) {
+      if (record.correct === record.total) {
+        contentArea.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--correct); font-weight: bold; font-size: 16px;">
+            🎉 すばらしい！この回は全問正解です！
+          </div>
+        `;
+      } else {
+        contentArea.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--sub); font-size: 14px;">
+            この学習記録には間違えた問題のデータが含まれていません。
+          </div>
+        `;
+      }
+    } else {
+      wrongList.forEach((item, i) => {
+        const card = document.createElement("div");
+        card.className = "detail-question-card";
+        card.innerHTML = `
+          <div class="detail-question-title">
+            <span style="color: var(--wrong); font-weight: bold;">✕ Q${i + 1}</span>
+            <span>${escapeHtml(item.q)}</span>
+          </div>
+          <div class="detail-answer-box">
+            正解: ${escapeHtml(item.a)}
+          </div>
+          <div class="detail-explanation-box">
+            解説: ${escapeHtml(item.ex || "解説はありません。")}
+          </div>
+        `;
+        contentArea.appendChild(card);
+      });
+    }
+
+    document.getElementById("detail-modal").style.display = "flex";
+  }
+
+  function closeDetailModal() {
+    document.getElementById("detail-modal").style.display = "none";
   }
 
   // 簡易エスケープ（科目名表示などXSS対策）
@@ -740,6 +886,7 @@
     testPool = pool;
     currentIdx = 0;
     correctCount = 0;
+    sessionWrongQuestions = []; // 🌟 セッションの間違い履歴をリセット
 
     // 画面遷移
     document.getElementById("portal-screen").classList.remove("active");
@@ -779,7 +926,16 @@
     const currentQ = testPool[currentIdx];
     const isCorrect = (userAns === currentQ.a);
 
-    if (isCorrect) correctCount++;
+    if (isCorrect) {
+      correctCount++;
+    } else {
+      // 🌟 間違えた問題情報をプールに蓄積
+      sessionWrongQuestions.push({
+        q: currentQ.q,
+        a: currentQ.a,
+        ex: currentQ.ex || "解説はありません。"
+      });
+    }
 
     // フィードバック表示の更新
     const fbBox = document.getElementById("feedback-box");
@@ -826,14 +982,15 @@
     document.getElementById("result-title").textContent = title;
     document.getElementById("result-sub").textContent = sub;
 
-    // 得点記録を保存
+    // 得点記録を保存（🌟 間違えた問題リスト wrongQuestions も追加）
     const subjectLabel = document.querySelector(`#subject-selector [data-subject="${selectedSubject}"]`)?.textContent || selectedSubject;
     saveHistoryRecord({
       date: new Date().toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }),
       subjectLabel: subjectLabel,
       correct: correctCount,
       total: testPool.length,
-      pct: pct
+      pct: pct,
+      wrongQuestions: [...sessionWrongQuestions] // 🌟 保存
     });
     renderHistory();
   }
