@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>知識分野○×演習</title>
+<title>知識分野○×演習 - 対戦モード</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root {
     --bg: #0f1117;
@@ -27,18 +28,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 10px;
+    overflow-x: hidden;
   }
 
   header {
     width: 100%;
     max-width: 800px;
-    padding: 20px 0;
+    padding: 15px 0;
     text-align: center;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
-  header h1 { font-size: 24px; color: var(--text); }
+  header h1 { font-size: 24px; color: var(--text); font-weight: bold; }
 
   .container {
     width: 100%;
@@ -46,16 +48,16 @@
     background: var(--surface);
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    padding: 24px;
+    padding: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    position: relative; /* 認証画面の配置用 */
+    position: relative;
   }
 
   .screen { display: none; }
   .active { display: block; }
 
   /* ===== ポータル（設定）画面 ===== */
-  .setting-group { margin-bottom: 24px; }
+  .setting-group { margin-bottom: 20px; }
   .setting-label {
     font-size: 14px;
     color: var(--sub);
@@ -64,13 +66,13 @@
   }
   .grid-options {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
   }
   .grid-subjects {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
   }
   .option-btn {
     background: var(--card);
@@ -91,27 +93,40 @@
     color: #ffffff;
   }
 
-  .start-btn-container { text-align: center; margin-top: 32px; }
+  .start-btn-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    margin-top: 24px;
+  }
   .primary-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #ffffff;
     border: none;
-    padding: 16px 48px;
-    font-size: 18px;
+    padding: 14px 40px;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 30px;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(124, 92, 245, 0.4);
-    transition: transform 0.2s;
+    transition: transform 0.2s, opacity 0.2s;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
   }
   .primary-btn:hover { transform: translateY(-2px); }
+  .vs-btn {
+    background: linear-gradient(135deg, #f39c12, #e74c3c);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  }
 
   /* ===== クイズ画面 ===== */
   .quiz-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     color: var(--sub);
     font-size: 14px;
   }
@@ -120,7 +135,7 @@
     height: 6px;
     background: var(--border);
     border-radius: 3px;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     overflow: hidden;
   }
   .progress-fill {
@@ -133,66 +148,73 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 24px;
-    min-height: 140px;
-    font-size: 18px;
+    padding: 20px;
+    min-height: 120px;
+    font-size: 17px;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
   }
   .ox-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 20px;
   }
   .ox-btn {
-    height: 100px;
-    font-size: 48px;
+    height: 84px;
+    font-size: 36px;
     border: none;
     border-radius: var(--radius);
     cursor: pointer;
     color: #ffffff;
     transition: opacity 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
   }
-  .ox-btn:active { transform: scale(0.98); }
-  .btn-o { background: var(--correct); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3); }
-  .btn-x { background: var(--wrong); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3); }
-  .ox-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ox-btn:active { transform: scale(0.96); }
+  .btn-o { background: var(--correct); box-shadow: 0 6px 15px rgba(46, 204, 113, 0.25); }
+  .btn-x { background: var(--wrong); box-shadow: 0 6px 15px rgba(231, 76, 60, 0.25); }
+  .ox-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
   /* ===== フィードバック・解説 ===== */
   .feedback-box {
     display: none;
     background: var(--card);
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 16px;
     border-left: 6px solid var(--border);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
   .feedback-box.correct { border-left-color: var(--correct); }
   .feedback-box.wrong { border-left-color: var(--wrong); }
-  .feedback-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+  .feedback-title { font-size: 18px; font-weight: bold; margin-bottom: 6px; }
   .feedback-box.correct .feedback-title { color: var(--correct); }
   .feedback-box.wrong .feedback-title { color: var(--wrong); }
-  .explanation-text { font-size: 15px; line-height: 1.6; color: #d1d5db; }
+  .explanation-text { font-size: 14px; line-height: 1.5; color: #d1d5db; }
 
   /* ===== 結果画面 ===== */
   .result-screen { text-align: center; }
-  .result-score { font-size: 64px; font-weight: bold; margin: 16px 0; color: var(--accent); }
-  .result-eval { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
-  .result-detail { color: var(--sub); margin-bottom: 32px; }
+  .result-score { font-size: 56px; font-weight: bold; margin: 12px 0; color: var(--accent); }
+  .result-eval { font-size: 20px; font-weight: bold; margin-bottom: 6px; }
+  .result-detail { color: var(--sub); margin-bottom: 24px; }
   .result-actions {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
   }
   .secondary-btn {
     background: var(--card);
     color: var(--text);
     border: 1px solid var(--border);
-    padding: 14px 32px;
-    font-size: 16px;
+    padding: 12px 24px;
+    font-size: 15px;
     font-weight: bold;
     border-radius: 30px;
     cursor: pointer;
@@ -202,16 +224,16 @@
 
   /* ===== 得点履歴 ===== */
   .history-section {
-    margin-top: 36px;
+    margin-top: 28px;
     text-align: left;
     border-top: 1px solid var(--border);
-    padding-top: 20px;
+    padding-top: 16px;
   }
   .history-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   .history-header .setting-label { margin-bottom: 0; }
   .history-clear-btn {
@@ -226,111 +248,94 @@
   .history-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 13px;
   }
   .history-table th, .history-table td {
-    padding: 12px 10px;
+    padding: 10px 8px;
     text-align: left;
     border-bottom: 1px solid var(--border);
   }
   .history-table th {
     color: var(--sub);
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px;
   }
-  /* 🌟 行をタップ可能にデザイン */
   .history-row {
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
+    transition: background 0.2s ease;
   }
   .history-row:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .history-row:active {
-    background: rgba(255, 255, 255, 0.08);
-  }
-  .history-empty {
-    color: var(--sub);
-    font-size: 14px;
-    padding: 12px 0;
+    background: rgba(255, 255, 255, 0.04);
   }
 
-  /* ===== 認証画面用スタイル ===== */
+  /* ===== 認証画面 ===== */
   .auth-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.88);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
   }
-
   .auth-dialog {
     background: #11141d;
     width: 90%;
-    max-width: 420px;
+    max-width: 380px;
     border-radius: 20px;
-    padding: 40px;
+    padding: 30px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
-
   .auth-icon-box {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     background: #191c28;
     border: 1px solid rgba(124, 92, 245, 0.2);
     border-radius: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
-
-  /* 鍵アイコン（SVG） */
   .lock-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     stroke: var(--accent2);
     fill: none;
     stroke-width: 2;
   }
-
   .auth-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     color: #ffffff;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
-
   .auth-description {
-    font-size: 14px;
+    font-size: 13px;
     color: #8b90aa;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     line-height: 1.5;
   }
-
   .pin-input-area {
     width: 100%;
     position: relative;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
-
   .pin-input {
     width: 100%;
-    height: 54px;
+    height: 48px;
     background: #191c28;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    font-size: 32px;
+    font-size: 28px;
     color: transparent;
     text-align: center;
     letter-spacing: 0.5em;
@@ -339,9 +344,7 @@
   .pin-input:focus {
     outline: none;
     border-color: rgba(124, 92, 245, 0.5);
-    box-shadow: 0 0 0 3px rgba(124, 92, 245, 0.1);
   }
-
   .pin-dots {
     position: absolute;
     top: 0;
@@ -353,61 +356,203 @@
     align-items: center;
     pointer-events: none;
   }
-
   .dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: #3c4155;
-    margin: 0 8px;
-    transition: background 0.1s ease;
+    margin: 0 6px;
   }
-  .dot.active {
-    background: #ffffff;
-  }
-
+  .dot.active { background: #ffffff; }
   .auth-submit-btn {
     width: 100%;
-    height: 54px;
+    height: 48px;
     background: var(--accent2);
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
   }
-  .auth-submit-btn:hover {
-    opacity: 0.9;
-  }
-  .auth-submit-btn:active {
-    transform: scale(0.99);
-  }
-
   .auth-error-text {
     font-size: 12px;
     color: var(--wrong);
-    margin-top: 12px;
-    height: 1em;
-    display: none; /* 初期状態では非表示 */
+    margin-top: 10px;
+    display: none;
   }
 
-  /* アクセス拒否時のスタイル */
-  .auth-denied {
+  /* ===== 🌟 対戦モードレイアウトスタイル ===== */
+  .vs-layout-container {
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 500;
+    background: #090a0f;
+    overflow: hidden;
+  }
+
+  /* プレイヤーエリア共通 */
+  .player-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    position: relative;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease;
+  }
+
+  /* プレイヤー1（画面上部）：180度回転し対面に向ける */
+  .player1-area {
+    transform: rotate(180deg);
+    border-bottom: 2px solid #202435;
+    background-color: #0f111a;
+  }
+
+  /* プレイヤー2（画面下部） */
+  .player2-area {
+    background-color: #0c0d15;
+  }
+
+  /* 仕切り中央タイマーバー */
+  .divider-bar {
+    height: 44px;
+    background: #151824;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-weight: bold;
+    color: #fff;
+    border-top: 2px solid #2e3248;
+    border-bottom: 2px solid #2e3248;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    z-index: 510;
+  }
+
+  /* 対戦用ミニステータス */
+  .vs-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--sub);
+  }
+
+  /* 対戦用問題文カード */
+  .vs-question-card {
+    background: #1c1e2d;
+    border: 1px solid #2e3248;
+    border-radius: var(--radius);
+    padding: 16px;
+    flex: 1;
+    margin: 10px 0;
+    display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 60px 20px;
-    color: var(--wrong);
-    font-weight: bold;
-    font-size: 18px;
-    height: 300px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #fff;
+    overflow-y: auto;
   }
 
-  /* 🌟 新機能：詳細ポップアップ（モーダル）用の追加スタイル */
+  /* 対戦用ボタン */
+  .vs-ox-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    height: 80px;
+  }
+
+  /* カウントダウンオーバーレイ */
+  .countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 11, 16, 0.95);
+    z-index: 600;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+  }
+  .countdown-number {
+    font-size: 120px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #f39c12, #e74c3c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pulse 1s ease infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+  }
+
+  /* フラッシュ演出（正解・不正解の瞬間） */
+  .flash-correct {
+    background-color: rgba(46, 204, 113, 0.15) !important;
+  }
+  .flash-wrong {
+    background-color: rgba(231, 76, 60, 0.15) !important;
+  }
+
+  /* 対戦完了待機表示 */
+  .waiting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 29, 39, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: var(--radius);
+  }
+
+  /* 対戦結果比較テーブル */
+  .vs-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    text-align: left;
+  }
+  .vs-summary-table th, .vs-summary-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .vs-summary-table th {
+    background: var(--card);
+    color: var(--sub);
+  }
+  .badge {
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+    display: inline-block;
+  }
+  .badge-correct { background-color: var(--correct); }
+  .badge-wrong { background-color: var(--wrong); }
+
+  /* モダールスタイル */
   .detail-modal-dialog {
     background: #11141d;
     width: 95%;
@@ -433,48 +578,17 @@
     overflow-y: auto;
     padding-right: 4px;
   }
-  .detail-question-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .detail-question-title {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 8px;
-    color: var(--text);
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .detail-answer-box {
-    font-size: 13px;
-    color: var(--correct);
-    font-weight: bold;
-    margin-bottom: 6px;
-    padding-left: 20px;
-  }
-  .detail-explanation-box {
-    font-size: 12px;
-    color: var(--sub);
-    border-top: 1px dashed var(--border);
-    padding-top: 8px;
-    margin-top: 6px;
-    padding-left: 20px;
-    line-height: 1.5;
-  }
 </style>
 </head>
 <body>
 
-<header>
+<header id="main-header">
   <h1 id="app-title">知識分野○×演習</h1>
 </header>
 
 <div class="container" id="main-container">
   
+  <!-- ポータル（設定）画面 -->
   <div id="portal-screen" class="screen active">
     <div class="setting-group">
       <div class="setting-label">演習科目を選択</div>
@@ -492,7 +606,7 @@
       </div>
     </div>
 
-    <div class="setting-group">
+    <div class="setting-group" id="normal-count-group">
       <div class="setting-label">出題問題数</div>
       <div class="grid-options" id="count-selector">
         <div class="option-btn selected" data-count="10">10問</div>
@@ -503,7 +617,7 @@
       </div>
     </div>
 
-    <div class="setting-group">
+    <div class="setting-group" id="normal-order-group">
       <div class="setting-label">出題順序</div>
       <div class="grid-options" id="order-selector">
         <div class="option-btn selected" data-order="random">ランダム</div>
@@ -512,10 +626,12 @@
     </div>
 
     <div class="start-btn-container">
-      <button class="primary-btn" onclick="loadAndStartQuiz()">演習を開始する</button>
+      <button class="primary-btn" onclick="loadAndStartQuiz(false)">通常演習を開始する</button>
+      <button class="primary-btn vs-btn" onclick="loadAndStartQuiz(true)">🔥 対戦モードを開始する</button>
     </div>
   </div>
 
+  <!-- 通常クイズ画面 -->
   <div id="quiz-screen" class="screen">
     <div class="quiz-header">
       <span id="quiz-title-display">科目: 未選択</span>
@@ -538,23 +654,45 @@
       <div id="feedback-title" class="feedback-title">正解！</div>
       <div id="explanation-text" class="explanation-text">解説文がここに表示されます。</div>
       <div style="text-align: right; margin-top: 16px;">
-        <button class="primary-btn" style="padding: 10px 24px; font-size: 14px;" onclick="nextQuestion()">次へ進む</button>
+        <button class="primary-btn" style="padding: 10px 24px; font-size: 14px; width: auto;" onclick="nextQuestion()">次へ進む</button>
       </div>
     </div>
   </div>
 
+  <!-- 通常結果画面 / 対戦結果画面共通 -->
   <div id="result-screen" class="screen result-screen">
-    <div style="font-size: 18px; color: var(--sub);">演習終了</div>
+    <div id="result-mode-title" style="font-size: 18px; color: var(--sub);">演習終了</div>
     <div class="result-score" id="result-pct">0%</div>
     <div class="result-eval" id="result-title">ここに評価</div>
     <div class="result-detail" id="result-sub">0 / 0 問正解</div>
 
-    <div class="result-actions">
-      <button class="secondary-btn" onclick="backToPortal()">科目選択へ戻る</button>
-      <button class="primary-btn" onclick="retryQuiz()">同じ設定で再挑戦</button>
+    <!-- 対戦結果用の詳細コンポーネント（非表示デフォルト） -->
+    <div id="vs-result-details" style="display: none; margin-bottom: 24px;">
+      <h3 class="text-left font-bold text-lg mb-2 text-yellow-400">📊 対戦解答詳細</h3>
+      <div class="overflow-x-auto">
+        <table class="vs-summary-table">
+          <thead>
+            <tr>
+              <th width="8%">No.</th>
+              <th width="52%">問題</th>
+              <th width="20%">プレイヤー1</th>
+              <th width="20%">プレイヤー2</th>
+            </tr>
+          </thead>
+          <tbody id="vs-summary-rows">
+            <!-- 動的に挿入 -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="history-section">
+    <div class="result-actions">
+      <button class="secondary-btn" id="btn-back-portal" onclick="backToPortal()">科目選択へ戻る</button>
+      <button class="primary-btn" id="btn-retry" onclick="retryQuiz()">同じ設定で再挑戦</button>
+    </div>
+
+    <!-- 得点履歴（通常用のみ表示） -->
+    <div class="history-section" id="history-panel">
       <div class="history-header">
         <div class="setting-label">直近の得点記録（最大10件 / タップして間違えた問題を確認）</div>
         <button class="history-clear-btn" onclick="clearHistory()">記録を削除</button>
@@ -565,11 +703,78 @@
 
 </div>
 
-<!-- 認証オーバーレイ画面 -->
+<!-- 🌟 対戦用カウントダウンオーバーレイ -->
+<div id="countdown-overlay" class="countdown-overlay" style="display: none;">
+  <div class="text-xl mb-4 tracking-wider text-yellow-500 font-bold">READY?</div>
+  <div id="countdown-text" class="countdown-number">5</div>
+  <div class="text-sm mt-4 text-gray-400">スマホを間に挟んで向かい合ってください！</div>
+</div>
+
+<!-- 🌟 対戦用フルスクリーン画面 -->
+<div id="vs-game-container" class="vs-layout-container" style="display: none;">
+  
+  <!-- プレイヤー1（画面上部・180度反転） -->
+  <div id="p1-area" class="player-area player1-area">
+    <div class="vs-status-bar">
+      <span id="p1-subject-title">科目: 物理</span>
+      <span id="p1-progress">1 / 10 問</span>
+    </div>
+    
+    <div id="p1-question-card" class="vs-question-card">
+      問題文がここに表示されます。
+    </div>
+    
+    <div class="vs-ox-container">
+      <!-- 左右配置をプレイヤー2と対面にするため、並びを反転させて直感性を高めています -->
+      <button class="ox-btn btn-x" onclick="handleVsAnswer(1, '×')">×</button>
+      <button class="ox-btn btn-o" onclick="handleVsAnswer(1, '○')">○</button>
+    </div>
+
+    <!-- P1完了時の待機画面 -->
+    <div id="p1-waiting" class="waiting-overlay" style="display: none;">
+      <span class="text-yellow-400 font-bold text-xl">解答完了！</span>
+      <span class="text-sm text-gray-300 mt-2">対戦相手が解き終わるのを待っています...</span>
+    </div>
+  </div>
+
+  <!-- 中央仕切りバー（タイマー＆進捗） -->
+  <div class="divider-bar">
+    <div style="font-size: 11px; color: #e74c3c; display: flex; align-items: center; gap: 4px;">
+      <span>TIME</span>
+      <span id="vs-timer-text" style="font-family: monospace; font-size: 18px; color: #fff;">60.0</span>
+    </div>
+    <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.1em; color: #a29bfe;">VS MODE</div>
+    <div id="vs-timer-bar" style="position: absolute; bottom: 0; left: 0; height: 3px; background: #e74c3c; width: 100%; transition: width 0.1s linear;"></div>
+  </div>
+
+  <!-- プレイヤー2（画面下部・正対表示） -->
+  <div id="p2-area" class="player-area player2-area">
+    <div class="vs-status-bar">
+      <span id="p2-subject-title">科目: 物理</span>
+      <span id="p2-progress">1 / 10 問</span>
+    </div>
+    
+    <div id="p2-question-card" class="vs-question-card">
+      問題文がここに表示されます。
+    </div>
+    
+    <div class="vs-ox-container">
+      <button class="ox-btn btn-o" onclick="handleVsAnswer(2, '○')">○</button>
+      <button class="ox-btn btn-x" onclick="handleVsAnswer(2, '×')">×</button>
+    </div>
+
+    <!-- P2完了時の待機画面 -->
+    <div id="p2-waiting" class="waiting-overlay" style="display: none;">
+      <span class="text-yellow-400 font-bold text-xl">解答完了！</span>
+      <span class="text-sm text-gray-300 mt-2">対戦相手が解き終わるのを待っています...</span>
+    </div>
+  </div>
+</div>
+
+<!-- 認証オーバーレイ -->
 <div id="auth-overlay" class="auth-overlay">
   <div class="auth-dialog">
     <div class="auth-icon-box">
-      <!-- 鍵アイコン（SVG） -->
       <svg class="lock-icon" viewBox="0 0 24 24">
         <rect x="5" y="11" width="14" height="10" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -579,9 +784,7 @@
     <div class="auth-description">在籍生専用システムです。暗証番号を入力してください。</div>
     
     <div class="pin-input-area">
-      <!-- 実際の入力 -->
       <input type="password" id="pin-input" class="pin-input" maxlength="4" pattern="\d*">
-      <!-- 見た目のドット -->
       <div id="pin-dots" class="pin-dots">
         <div class="dot"></div>
         <div class="dot"></div>
@@ -595,7 +798,7 @@
   </div>
 </div>
 
-<!-- 🌟 新機能：詳細ポップアップ（モーダル画面） -->
+<!-- 履歴詳細モーダル -->
 <div id="detail-modal" class="auth-overlay" style="display: none;">
   <div class="detail-modal-dialog">
     <div class="detail-modal-header">
@@ -603,10 +806,10 @@
         <h3 style="font-size: 18px; font-weight: bold; color: #ffffff;" id="detail-modal-subject">科目名</h3>
         <p id="detail-modal-date" style="font-size: 11px; color: var(--sub); margin-top: 4px;">実施日時</p>
       </div>
-      <button onclick="closeDetailModal()" style="background: none; border: none; color: var(--sub); font-size: 24px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--sub)'">&times;</button>
+      <button onclick="closeDetailModal()" style="background: none; border: none; color: var(--sub); font-size: 24px; cursor: pointer;">&times;</button>
     </div>
     <div class="detail-modal-body" id="detail-modal-content">
-      <!-- ここに間違えた問題一覧が動的に挿入されます -->
+      <!-- 動的挿入 -->
     </div>
     <div style="text-align: right; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
       <button class="secondary-btn" style="padding: 10px 24px; font-size: 14px;" onclick="closeDetailModal()">閉じる</button>
@@ -615,7 +818,131 @@
 </div>
 
 <script>
-  // ===== 認証システム（修正版） =====
+  // ===== 🌟 内蔵フォールバック問題データ（サーバーJSON不在時でも動くように全問を確保） =====
+  const EMBEDDED_QUESTIONS = {
+    seiji: [
+      { q: "日本国憲法は、天皇を「国事行為を行うのみの象徴」と規定している。", a: "○", ex: "憲法第4条に、天皇は憲法の定める国事に関する行為のみを行い、国政に関する権能を有しないと定められています。" },
+      { q: "衆議院の解散は、内閣総理大臣の専権事項ではなく、衆議院の決議のみによって行われる。", a: "×", ex: "憲法第7条（天皇の国事行為）に基づき、内閣の助言と承認を得て天皇によって行われます。実質的な決定権は内閣（総理）にあります。" },
+      { q: "日本の参議院議員の任期は、衆議院と同じく4年である。", a: "×", ex: "参議院議員の任期は6年で、3年ごとに半数が改選されます。" },
+      { q: "内閣総理大臣は、国会議員の中から国会の議決によって指名される。", a: "○", ex: "憲法第67条に基づき、国会議員の中から指名されます。" },
+      { q: "国会は、国の唯一の立法機関である。", a: "○", ex: "憲法第41条により「国会は、国権の最高機関であつて、国の唯一の立法機関である」と規定されています。" },
+      { q: "日本における最高裁判所の裁判官は、内閣によって任命される。", a: "○", ex: "長官は内閣の指名に基づき天皇が任命、その他の裁判官は内閣が任命します。" },
+      { q: "1つの地方公共団体にのみ適用される特別法は、住民投票で過半数の同意を得なければ制定できない。", a: "○", ex: "憲法第95条に基づき、住民投票による地方特別法の承認手続きが定められています。" },
+      { q: "憲法の改正原案は、国会で衆参各議院の過半数の賛成があれば可決される。", a: "×", ex: "各議院の「総議員の3分の2以上」の賛成で国会が発議し、国民投票にかけられます。" },
+      { q: "行政代執行とは、義務者が行政上の義務を履行しない場合に、行政庁自ら、または第三者がこれを行うことである。", a: "○", ex: "行政上の不履行に対して、実力で代替執行を可能にする手続きです。" },
+      { q: "日本国憲法は私人間（民間企業や個人の間）の関係にも直接、全面的に適用される。", a: "×", ex: "原則、国家と市民の間（公権力規制）を想定したものであり、私人間は民法等で処理されます（三菱樹脂事件判例等）。" }
+    ],
+    keizai: [
+      { q: "インフレーションとは、物価が継続的に下落し、貨幣価値が上昇する現象である。", a: "×", ex: "これは「デフレーション」の定義です。インフレーションは物価が上昇し貨幣価値が下落します。" },
+      { q: "GDP（国内総生産）には、日本国籍を持つ人が海外で生産した価値も含まれる。", a: "×", ex: "国内で生産された価値の合計であるため、海外分は含みません（それはGNPやGNIに含まれます）。" },
+      { q: "日本銀行が国債を買い入れるオペレーション（買いオペ）は、市場の資金量を増やす効果がある。", a: "○", ex: "日銀が民間銀行から国債を買い取り資金を供給するため、市場に流れる資金が増加（金融緩和）します。" },
+      { q: "需要と供給の法則により、需要が供給を上回る場合は価格が上昇する傾向がある。", a: "○", ex: "買いたい人が多い（不足状態）と、市場での価格は上がります。" },
+      { q: "独占禁止法の運用を行う機関は、内閣府に置かれる公正取引委員会である。", a: "○", ex: "独立性の高い「三条委員会」として設置されています。" },
+      { q: "円高ドル安が進むと、日本の輸出企業にとっては一般的に利益が出やすくなる。", a: "×", ex: "円高は輸出企業にとって外貨建て利益の日本円換算額が減るため、不利（赤字要因）となります。" },
+      { q: "完全失業者とは、働く能力と意思があるが、職に就けず求職活動を行っている者のことである。", a: "○", ex: "単に働いていないだけでなく「働く意志と能力があり、求職中」の人が完全失業者に分類されます。" },
+      { q: "累進課税制度とは、所得が増えるほど税率が高くなる制度である。", a: "○", ex: "所得格差の是正を目的に日本の所得税などで採用されています。" },
+      { q: "株式会社における株主の責任は、有限責任ではなく無限責任である。", a: "×", ex: "株主は出資額を限度とする「有限責任」を負います。" },
+      { q: "コンドラチェフの波とは、設備投資の循環を原因とする約10年周期の景気循環のことである。", a: "×", ex: "コンドラチェフの波は約50年（技術革新など）周期です。10年周期はジュグラーの波です。" }
+    ],
+    sekaishi: [
+      { q: "古代エジプトの神聖文字（ヒエログリフ）は、シャンポリオンによって解読された。", a: "○", ex: "ロゼッタ・ストーンをヒントに、フランスのシャンポリオンが解読に成功しました。" },
+      { q: "アケメネス朝ペルシアを滅ぼしたのは、マケドニアのアレクサンドロス大王である。", a: "○", ex: "前330年にダレイオス3世を破り、アケメネス朝を滅亡させました。" },
+      { q: "西ローマ帝国は、476年にオドアケルによって滅ぼされた。", a: "○", ex: "ゲルマン人傭兵隊長オドアケルにより皇帝が廃位され、西ローマ帝国が滅亡しました。" },
+      { q: "唐の建国者は、太宗（李世民）である。", a: "×", ex: "建国者（高祖）は李淵（りえん）です。李世民はその子（第2代皇帝）です。" },
+      { q: "十字軍運動のきっかけは、セルジューク朝の聖地エルサレム占領とビザンツ帝国への圧迫である。", a: "○", ex: "これに危機感を覚えた皇帝がローマ教皇ウルバヌス2世に救援を求め、十字軍が提唱されました。" },
+      { q: "フランス革命において、ルイ16世が処刑された後にナポレオンがただちに政権を掌握した。", a: "×", ex: "ルイ16世の処刑（1793年）の後、ロベスピエールの恐怖政治や総裁政府の時期を経てから、ナポレオンが政権をとりました（1799年）。" },
+      { q: "産業革命は、18世紀後半のイギリスにおける毛織物工業から始まった。", a: "×", ex: "毛織物ではなく、「綿織物（コットン）」の機械化から始まりました。" },
+      { q: "サラエボ事件（1914年）が契機となり、第一次世界大戦が勃発した。", a: "○", ex: "オーストリア皇太子夫妻が暗殺された事件が直接の引き金となりました。" },
+      { q: "国際連盟の発足を提唱したのは、アメリカ大統領ウィルソンである。", a: "○", ex: "「十四箇条の平和原則」において提唱されましたが、米国自身は議会の反対で参加できませんでした。" },
+      { q: "中国の「大躍進」政策を推進したのは鄧小平である。", a: "×", ex: "1950年代末から始まった大躍進政策を指導したのは毛沢東です。" }
+    ],
+    nihonshi: [
+      { q: "聖徳太子が制定した「冠位十二階」は、氏姓制度にとらわれず、才能や功績のある人材を登用する制度であった。", a: "○", ex: "個人の資質や功績を重んじて等級を与える画期的な官僚登用制度でした。" },
+      { q: "壬申の乱（672年）で勝利し、天武天皇として即位したのは大海人皇子である。", a: "○", ex: "大友皇子を破って実権を握り、のちに即位して中央集権化を進めました。" },
+      { q: "平清盛が太政大臣に就任したのは、鎌倉幕府が成立した後である。", a: "×", ex: "平清盛の就任は1167年で、鎌倉幕府成立（1185年や1192年）よりも前です。" },
+      { q: "建武の新政を開始したのは、足利尊氏である。", a: "×", ex: "鎌倉幕府を滅ぼし、自ら親政を再開したのは後醍醐天皇です。" },
+      { q: "豊臣秀吉が行った「太閤検地」では、全国の土地の生産力を「石高」で表した。", a: "○", ex: "これによって各地の石高が確定し、それに応じた軍役や年貢の体系が作られました。" },
+      { q: "江戸時代の参勤交代を定めた武家諸法度は、3代将軍徳川家光のときに改定されたものである。", a: "○", ex: "家光の寛永令（1635年）によって大名の参勤交代が義務化されました。" },
+      { q: "ペリーが浦賀に来航した年は1868年（明治元年）である。", a: "×", ex: "ペリー来航は1853年（幕末）です。明治維新より前です。" },
+      { q: "日本初の本格的な政党内閣を組織したのは、原敬である。", a: "○", ex: "1918年に、陸相・海相・外相以外の閣僚を立憲政友会から選出し、「平民宰相」と呼ばれました。" },
+      { q: "日露戦争の講和条約であるポーツマス条約において、日本は清から台湾を割譲された。", a: "×", ex: "台湾の割譲は、日清戦争の講和条約である「下関条約（1895年）」によるものです。" },
+      { q: "聖武天皇が国分寺・国分尼寺の建立を命じたのは、鎮護国家思想に基づき国内の疫病や社会不安を鎮めるためであった。", a: "○", ex: "仏教の力で国家の安寧を祈るため、各地に建立が命じられました。" }
+    ],
+    chiri: [
+      { q: "赤道の緯度は0度、北極点の緯度は北緯90度である。", a: "○", ex: "その通りです。またイギリスを通る本初子午線が経度0度となります。" },
+      { q: "ケッペンの気候区分において、砂漠気候やステップ気候が含まれるのは「乾燥帯（B）」である。", a: "○", ex: "降水量が極端に少ない地域がB（乾燥帯）に属し、植生の有無等で細分化されます。" },
+      { q: "エルニーニョ現象とは、太平洋赤道域の日付変更線付近から南米沿岸にかけて、海面水温が平年より低くなる現象である。", a: "×", ex: "水温が平年より「高く」なる現象です。低くなる現象は「ラニーニャ現象」と呼びます。" },
+      { q: "フィヨルドとは、氷河によって削られた谷に海水が深く入り込んでできた湾である。", a: "○", ex: "ノルウェーやニュージーランドの海岸線に多く見られる特徴的な地形です。" },
+      { q: "世界で最も人口が多い国は、2026年現在も依然として中国である。", a: "×", ex: "国連の推計によると、2023年頃にインドの人口が中国を追い抜き世界一となっています。" },
+      { q: "リアス海岸は、波によって削られた平坦な台地が隆起してできた海岸地形である。", a: "×", ex: "隆起ではなく、起伏に富んだ山地が沈水（沈降）してできた複雑な海岸地形です。" },
+      { q: "サヘルとは、アフリカのサハラ砂漠南縁に沿って広がる半乾燥の移行地帯のことである。", a: "○", ex: "砂漠化の進行が地球環境的な問題となっている地域です。" },
+      { q: "ユーロを法定通貨として導入している国（ユーロ圏）は、EU（欧州連合）加盟国の全てである。", a: "×", ex: "EU加盟国であっても、デンマークやスウェーデンのように独自の通貨を使用している国が存在します。" },
+      { q: "環太平洋造山帯には、日本列島だけでなくアンデス山脈やロッキー山脈も含まれる。", a: "○", ex: "太平洋を囲むように火山や地震活動が活発な造山帯が形成されています。" },
+      { q: "米国のシリコンバレーは、豊かな石炭資源を背景とした重化学工業地帯として発展した。", a: "×", ex: "シリコンバレーは、カリフォルニア州のIT・ハイテク産業の中心地であり、重工業地帯ではありません。" }
+    ],
+    seibutsu: [
+      { q: "植物細胞と動物細胞の共通点として、どちらにも細胞壁が存在する。", a: "×", ex: "細胞壁があるのは植物細胞（や菌類、細菌類）のみで、動物細胞には存在しません。" },
+      { q: "光合成を行う細胞小器官は「葉緑体」である。", a: "○", ex: "葉緑体に存在するクロロフィルなどの色素が光を吸収し、二酸化炭素と水から有機物を合成します。" },
+      { q: "DNAの二重らせん構造において、アデニン（A）は常にグアニン（G）と結合する。", a: "×", ex: "アデニン（A）は「チミン（T）」、グアニン（G）は「シトシン（C）」と相補的に結合します。" },
+      { q: "インスリンは、膵臓（すいぞう）のランゲルハンス島B細胞から分泌され、血糖値を下げる働きを持つ。", a: "○", ex: "血液中のブドウ糖を取り込ませることで血糖値を低下させます。" },
+      { q: "ヒトの体細胞における染色体の数は、通常46本である。", a: "○", ex: "常染色体44本（22対）と、性染色体2本（1対）の計46本です。" },
+      { q: "ATP（アデノシン三リン酸）は、生物の体内におけるエネルギーの通貨として使われる物質である。", a: "○", ex: "細胞内での各種の生命活動に必要なエネルギーの仲介役です。" },
+      { q: "獲得免疫の一種である「抗体」を主に産生するのは、T細胞が変化した赤血球である。", a: "×", ex: "抗体を産生するのは「B細胞（Bリンパ球）」が分化した形質細胞です。赤血球は酸素を運ぶ役割です。" },
+      { q: "酵素は、化学反応の進行を速める触媒として機能するが、反応前後で自身は変化しない。", a: "○", ex: "生体触媒として特定の基質に対してのみ作用し、自らは消費されません。" },
+      { q: "減数分裂は、生殖細胞（卵や精子など）が形成される際に行われる、染色体数が半分になる分裂である。", a: "○", ex: "世代を経ても染色体数が倍化するのを防ぐ仕組みです。" },
+      { q: "植物の屈光性は、成長促進ホルモンである「オーキシン」の分布が光の当たる側で多くなることで起こる。", a: "×", ex: "オーキシンは光を避けて「光の当たらない（影の）側」に多く蓄積し、そちら側が急速に成長するため、光の方へ曲がります。" }
+    ],
+    chigaku: [
+      { q: "地球の内部構造において、最も外側を「地殻」、最も内側を「核（地核）」と呼ぶ。", a: "○", ex: "外側から、地殻・マントル・外核・内核の順で構成されています。" },
+      { q: "日本列島の近くにある太平洋プレートは、ユーラシアプレートの下へ沈み込んでいる。", a: "○", ex: "海溝（プレート境界）において、高密度の海洋プレートが大陸プレートの下へと沈み込んでいます。" },
+      { q: "震度とは、地震そのものの規模（エネルギー）の大きさを表す絶対的な数値である。", a: "×", ex: "規模を表すのは「マグニチュード」です。震度はある地点での「揺れの強さ（10段階）」を表します。" },
+      { q: "気圧は標高が高くなるほど低くなるが、温度（気温）は対流圏においては標高が高くなるほど下がる。", a: "○", ex: "対流圏では上空に行くほど地上からの熱放射が減少し、約100mごとに0.6度下がります。" },
+      { q: "温暖前線が通過するとき、一般的には激しい夕立（積乱雲による一時的な強雨）となることが多い。", a: "×", ex: "激しい雨を伴うのは「寒冷前線」です。温暖前線は乱層雲などから比較的穏やかな雨が長く降ります。" },
+      { q: "現在の宇宙は約138億年前に大爆発（ビッグバン）から始まったと考えられている。", a: "○", ex: "宇宙膨張の逆算や宇宙マイクロ波背景放射の観測などから導かれています。" },
+      { q: "太陽系において、木星や土星は岩石を主成分とする地球型惑星に分類される。", a: "×", ex: "木星や土星はガスを主成分とする「木星型惑星」に分類されます。" },
+      { q: "太陽の表面に見られる黒い斑点（黒点）は、周囲より温度が高いために黒く見える領域である。", a: "×", ex: "黒点は強い磁場によって熱対流が遮られ、周囲より約1500度「温度が低い」ために相対的に黒く見えます。" },
+      { q: "化石において、地層が堆積した当時の「年代（地質時代）」を決める決定鍵となる化石を「示準化石」と呼ぶ。", a: "○", ex: "特定の時代に広く、短期間だけ生存した生物の化石（三葉虫やアンモナイトなど）が使われます。" },
+      { q: "月の潮汐力によって海水が満ち引きするのは、月と地球の間の万有引力と、互いの公転による遠心力が作用するためである。", a: "○", ex: "これらの力が合わさった起潮力によって、一日におおむね2回の満潮・干潮が発生します。" }
+    ],
+    kagaku: [
+      { q: "原子の中心には「原子核」があり、その周りをマイナスの電荷を持つ「電子」が回っている。", a: "○", ex: "原子核（陽子と中性子からなる）の周囲を電子が取り巻いています。" },
+      { q: "水に溶かしたときに電流を通す物質を「電解質」、通さない物質を「非電解質」と呼ぶ。", a: "○", ex: "食塩（NaCl）などは電解質、砂糖などは非電解質です。" },
+      { q: "酸性とアルカリ性を表すpH（水素イオン指数）値において、pH7が中性であり、7より小さいほどアルカリ性が強くなる。", a: "×", ex: "7より小さいほど「酸性」が強くなり、大きいほどアルカリ性が強くなります。" },
+      { q: "ドライアイスは、酸素が固体になったものである。", a: "×", ex: "ドライアイスは「二酸化炭素（CO2）」が固体になったものです。" },
+      { q: "ダイヤモンドと黒鉛（グラファイト）は、どちらも炭素（C）のみからなる同素体である。", a: "○", ex: "同じ元素から構成されますが、結晶の配列構造（結合様式）が異なります。" },
+      { q: "鉄が錆びる反応は、鉄が空気中の酸素と結びつく「還元」反応の一種である。", a: "×", ex: "酸素と結びつく反応は「酸化」反応です。酸素を失うのが還元です。" },
+      { q: "希ガス元素（ヘリウム、ネオン、アルゴンなど）は、他の物質と極めて反応しにくい安定した元素である。", a: "○", ex: "最外殻電子が閉殻構造をとるため、化学的に不活性で非常に安定しています。" },
+      { q: "触媒は、化学反応自体のエネルギー変化の大きさを変えることで、反応の速さを変える。", a: "×", ex: "触媒は反応の経路（活性化エネルギー）を変えるだけで、反応物質と生成物質の持つエネルギー差（反応熱）自体は変えません。" },
+      { q: "アンモニアは水に非常によく溶け、その水溶液（アンモニア水）は弱アルカリ性を示す。", a: "○", ex: "無色の気体で特有の刺激臭を持ち、水に極めて溶けやすい性質があります。" },
+      { q: "水の分子式はH2Oであるが、水分子1つには共有結合が3箇所存在する。", a: "×", ex: "H-O-Hの構造であり、酸素原子と水素原子の間の共有結合は2箇所です。" }
+    ],
+    butsuri: [
+      { q: "オームの法則は、電流が電圧に比例し、抵抗に反比例するという関係を示す（I = V / R）。", a: "○", ex: "オームの法則の基本形です。抵抗Rが一定なら電流Iは電圧Vに比例します（問題画像の逆転文「電流が電圧に反比例する」は×になります）。" },
+      { q: "作用・反作用の法則によれば、物体Aが物体Bに力を加えるとき、Bも同時にAへ同じ大きさで逆向きの力を加える。", a: "○", ex: "ニュートンの第3法則です。作用と反作用は常にペアで同時に発生します。" },
+      { q: "真空中で羽毛と鉄球を同時に落とした場合、重い鉄球の方が先に底に到達する。", a: "×", ex: "空気抵抗がない真空中では、質量に関わらずすべての物体は同じ重力加速度（約9.8m/s²）で等しく落下します。" },
+      { q: "音波は空気中を伝わる「横波」の一種である。", a: "×", ex: "音波（空気中）は、媒質の振動方向と進む方向が同じ「縦波（疎密波）」です。" },
+      { q: "凸レンズに光を通したとき、レンズの軸に平行な光が集まる点を「焦点」と呼ぶ。", a: "○", ex: "平行光線が屈折して一点に集まる位置を焦点と呼びます。" },
+      { q: "物質の温度が高くなるほど、その物質を構成する分子や原子の熱運動は激しくなる。", a: "○", ex: "熱とは分子の乱雑な運動（熱運動）そのものであり、絶対零度（-273.15℃）でその運動がほぼ停止します。" },
+      { q: "静電気において、同じ種類の電荷（プラス同士、またはマイナス同士）は互いに引き合う。", a: "×", ex: "同種の電荷は「退け合い（反発力）」、異種の電荷（プラスとマイナス）が「引き合います（引力）」。" },
+      { q: "力学的エネルギー保存の法則とは、空気抵抗や摩擦がない場合、位置エネルギーと運動エネルギーの和が一定に保たれるという法則である。", a: "○", ex: "外力が仕事をしない保存力のみの場において、エネルギーの総和は常に不変です。" },
+      { q: "電磁誘導の法則において、コイルを貫く磁束の変化を妨げる向きに誘導電流が流れる法則を「レンツの法則」と呼ぶ。", a: "○", ex: "変化を嫌う自然の性質を反映した誘導電流の向きに関する法則です。" },
+      { q: "光の速さは秒速約30万キロメートルであり、これは1秒間に地球を約7周半進む速度に相当する。", a: "○", ex: "真空中の光速は約299,792,458m/sで、地球の周囲約4万kmを基準にすると約7.5周に該当します。" }
+    ],
+    shisou: [
+      { q: "古代ギリシャの哲学者ソクラテスは、人間にとって最も大切なことは単に生きることではなく「よく生きること」であると説いた。", a: "○", ex: "無知の知を自覚し、魂の配慮を行いながら正しく善く生きることを求めました。" },
+      { q: "「万物の流転（パンタ・レイ）」を説き、万物の根源（アルケー）を「火」とした思想家はヘラクレイトスである。", a: "○", ex: "すべては変化し続けるという動的な世界観を唱えました。" },
+      { q: "プラトンは、不完全な現実世界を超えた、完全で永遠不変の真理の世界を「イデア界」と呼んだ。", a: "○", ex: "洞窟の比喩などを通じて、感性で捉える現象世界と、理性で捉えるイデア世界を二元的に区別しました。" },
+      { q: "仏教の開祖であるブッダ（ゴータマ・シッダールタ）は、自己の魂を限界まで痛めつける極端な「苦行」のみが最終的な悟りを開く唯一の道であると結論づけた。", a: "×", ex: "ブッダは激しい苦行を無益とし、快楽と苦行の両極端を避ける「中道」の重要性を説いて悟りに至りました。" },
+      { q: "キリスト教の「隣人愛」を説いたイエスは、自分を愛してくれる親しい人々だけを愛せよと教えた。", a: "×", ex: "イエスは「敵を愛し、迫害する者のために祈れ」と教え、無差別・無条件の愛（アガペー）を説きました。" },
+      { q: "イスラームの聖典は『コーラン（クルアーン）』であり、唯一神アッラーの啓示が記されている。", a: "○", ex: "預言者ムハンマドが授かった神の言葉をアラビア語で記録した絶対的聖典です。" },
+      { q: "デカルトは、すべてを疑うことによって到達した絶対的な真理として「我思う、ゆえに我あり」という言葉を残した。", a: "○", ex: "方法的懐疑の果てに、疑っている自己の意識の存在だけは否定できないことを見出しました（大陸合理論の祖）。" },
+      { q: "経験論を創始したフランシス・ベーコンは、観察や実験を重んじ、先入観（イドラ）を排除して正しい知に迫る「帰納法」を提唱した。", a: "○", ex: "「知は力なり」と唱え、自然を支配するための実用的知識を追求しました。" },
+      { q: "カントは、人間が従うべき普遍的な道徳律を、見返りを求めない義務としての「仮言命法」の形として提示した。", a: "×", ex: "条件付きの「仮言命法（〜ならば〜せよ）」ではなく、無条件の命令である「定言命法（〜せよ）」に従うことこそが自律的な道徳であるとしました。" },
+      { q: "サルトルは「実存は本質に先立つ」と主張し、人間はあらかじめ決められた本質を持たず、自由な自己選択によって自らを作り上げていく存在（実存主義）であると説いた。", a: "○", ex: "神なき世界で、人間は自由という刑に処せられており、自らの選択に全責任を負うべきだと論じました。" }
+    ]
+  };
+
+  // ===== 認証システム =====
   const CORRECT_PIN = "1234";
   const AUTH_SESSION_KEY = "quiz_authenticated";
 
@@ -623,18 +950,12 @@
   const pinInput = document.getElementById('pin-input');
   const pinDots = document.getElementById('pin-dots').children;
   const authErrorText = document.getElementById('auth-error-text');
-  const container = document.getElementById("main-container");
 
-  // 入力時のドット更新と自動送信
   pinInput.addEventListener('input', (e) => {
-    // 数字以外を除去（iOSなどで発生することがある）
     e.target.value = e.target.value.replace(/\D/g, '');
     const length = e.target.value.length;
-    
-    // エラー表示を消す
     authErrorText.style.display = "none";
 
-    // ドットの表示を更新
     for (let i = 0; i < 4; i++) {
       if (i < length) {
         pinDots[i].classList.add('active');
@@ -643,13 +964,11 @@
       }
     }
 
-    // 4桁入力されたら自動で送信（遅延させて演出）
     if (length === 4) {
       setTimeout(submitPin, 150);
     }
   });
 
-  // ページ読み込み時のチェック
   document.addEventListener("DOMContentLoaded", () => {
     if (sessionStorage.getItem(AUTH_SESSION_KEY) === "true") {
       authOverlay.style.display = "none";
@@ -661,15 +980,12 @@
 
   function submitPin() {
     const userPin = pinInput.value;
-    
     if (userPin === CORRECT_PIN) {
       sessionStorage.setItem(AUTH_SESSION_KEY, "true");
       authOverlay.style.display = "none";
       initAppSettings();
     } else {
-      // 認証失敗
       authErrorText.style.display = "block";
-      // 入力をリセット
       pinInput.value = "";
       for (let i = 0; i < 4; i++) {
         pinDots[i].classList.remove('active');
@@ -693,7 +1009,32 @@
   let testPool = [];        // 抽出・調整後の出題用プール
   let currentIdx = 0;
   let correctCount = 0;
-  let sessionWrongQuestions = []; // 🌟 今回の演習で「できなかった」問題の保存用
+  let sessionWrongQuestions = []; 
+  let isVsMode = false; // 🌟対戦モードの判定フラグ
+
+  // 🌟 対戦用状態管理
+  let vsTimer = null;
+  let vsTimeLeft = 60.0; // 1分 (60秒)
+  let vsStartTime = 0;
+  
+  // プレイヤー1とプレイヤー2の状態
+  const p1 = {
+    questions: [],
+    idx: 0,
+    answers: [], // {qIdx, userAns, isCorrect, timestamp} の配列
+    correctCount: 0,
+    finished: false,
+    finishTime: null
+  };
+
+  const p2 = {
+    questions: [],
+    idx: 0,
+    answers: [],
+    correctCount: 0,
+    finished: false,
+    finishTime: null
+  };
 
   // ===== 得点履歴（localStorage） =====
   const HISTORY_KEY = "quizScoreHistory";
@@ -705,7 +1046,6 @@
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
-      console.error("履歴の読み込みに失敗しました。", e);
       return [];
     }
   }
@@ -713,12 +1053,10 @@
   function saveHistoryRecord(record) {
     try {
       const history = loadHistory();
-      history.unshift(record);          // 新しい記録を先頭に追加
-      const trimmed = history.slice(0, HISTORY_MAX); // 最大10件に制限
+      history.unshift(record);          
+      const trimmed = history.slice(0, HISTORY_MAX); 
       localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
-    } catch (e) {
-      console.error("履歴の保存に失敗しました。", e);
-    }
+    } catch (e) {}
   }
 
   function clearHistory() {
@@ -732,11 +1070,10 @@
     const history = loadHistory();
 
     if (history.length === 0) {
-      container.innerHTML = `<div class="history-empty">まだ記録がありません。</div>`;
+      container.innerHTML = `<div class="history-empty text-gray-500 py-3">まだ記録がありません。</div>`;
       return;
     }
 
-    // 🌟 行をタップ可能にし、onclickにモーダル表示を紐付け
     const rows = history.map((r, idx) => `
       <tr class="history-row" onclick="openDetailModal(${idx})">
         <td>${escapeHtml(r.date)}</td>
@@ -761,7 +1098,6 @@
     `;
   }
 
-  // 🌟 新機能：間違えた問題の一覧をポップアップで表示
   function openDetailModal(idx) {
     const history = loadHistory();
     const record = history[idx];
@@ -792,16 +1128,16 @@
     } else {
       wrongList.forEach((item, i) => {
         const card = document.createElement("div");
-        card.className = "detail-question-card";
+        card.className = "detail-question-card bg-slate-800 p-4 rounded-lg mb-3 border border-slate-700";
         card.innerHTML = `
-          <div class="detail-question-title">
+          <div class="detail-question-title flex items-start gap-2 mb-2">
             <span style="color: var(--wrong); font-weight: bold;">✕ Q${i + 1}</span>
-            <span>${escapeHtml(item.q)}</span>
+            <span class="text-white">${escapeHtml(item.q)}</span>
           </div>
-          <div class="detail-answer-box">
+          <div class="detail-answer-box text-sm text-green-400 font-bold mb-1 pl-5">
             正解: ${escapeHtml(item.a)}
           </div>
-          <div class="detail-explanation-box">
+          <div class="detail-explanation-box text-xs text-gray-400 pl-5 border-t border-slate-700 pt-2 mt-2 leading-relaxed">
             解説: ${escapeHtml(item.ex || "解説はありません。")}
           </div>
         `;
@@ -816,7 +1152,6 @@
     document.getElementById("detail-modal").style.display = "none";
   }
 
-  // 簡易エスケープ（科目名表示などXSS対策）
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -832,44 +1167,61 @@
       e.target.classList.add("selected");
       callback(e.target.dataset[Object.keys(e.target.dataset)[0]]);
     });
-    // 初期選択状態の取得
     const initialSelected = container.querySelector(".option-btn.selected");
     if (initialSelected) {
       callback(initialSelected.dataset[Object.keys(initialSelected.dataset)[0]]);
     }
   }
 
-  // 非同期処理：JSONデータのフェッチとクイズの組み立て
-  async function loadAndStartQuiz() {
+  // ===== 🌟 クイズ読み込みと開始制御 =====
+  async function loadAndStartQuiz(vsModeActive = false) {
     if (!selectedSubject) {
-      alert("演習を行う科目を選択してください。");
+      showMessageBox("演習を行う科目を選択してください。");
       return;
     }
 
-    try {
-      // 例: 'seiji.json' を読み込む
-      const response = await fetch(`${selectedSubject}.json`);
-      if (!response.ok) throw new Error("データの読み込みに失敗しました。");
-      
-      masterQuestions = await response.json();
-      
-      if (!masterQuestions || masterQuestions.length === 0) {
-        alert("該当科目の問題データが空です。");
-        return;
-      }
+    isVsMode = vsModeActive;
 
-      initQuizPool();
+    try {
+      // 外部サーバーJSON読み込みの試行
+      const response = await fetch(`${selectedSubject}.json`);
+      if (response.ok) {
+        masterQuestions = await response.json();
+      } else {
+        // 失敗時は内蔵フォールバックを使用
+        masterQuestions = EMBEDDED_QUESTIONS[selectedSubject] || [];
+      }
     } catch (error) {
-      console.error(error);
-      alert(`エラー: 科目データ（${selectedSubject}.json）が見つからないか、読み込めませんでした。 Webサーバー上で実行してください。`);
+      // オフライン・ローカル・エラー時は内蔵フォールバックを使用
+      masterQuestions = EMBEDDED_QUESTIONS[selectedSubject] || [];
+    }
+
+    if (!masterQuestions || masterQuestions.length === 0) {
+      showMessageBox("指定した科目の問題データが見つかりませんでした。");
+      return;
+    }
+
+    if (isVsMode) {
+      startVsCountdown();
+    } else {
+      initQuizPool();
     }
   }
 
-  // クイズ用プールの構築（シャッフルおよび問題数制限）
+  // メッセージボックス表示 (alert代替)
+  function showMessageBox(msg) {
+    const modal = document.getElementById("detail-modal");
+    document.getElementById("detail-modal-subject").textContent = "お知らせ";
+    document.getElementById("detail-modal-date").textContent = "";
+    const content = document.getElementById("detail-modal-content");
+    content.innerHTML = `<div class="text-center py-6 text-yellow-400 font-bold text-lg">${escapeHtml(msg)}</div>`;
+    modal.style.display = "flex";
+  }
+
+  // ===== 🌟 通常モード開始処理 =====
   function initQuizPool() {
     let pool = [...masterQuestions];
 
-    // 配列のシャッフル（ランダム）
     if (selectedOrder === "random") {
       for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -877,7 +1229,6 @@
       }
     }
 
-    // 出題数の切り出し
     if (selectedCount !== "all") {
       const limit = parseInt(selectedCount, 10);
       pool = pool.slice(0, limit);
@@ -886,22 +1237,22 @@
     testPool = pool;
     currentIdx = 0;
     correctCount = 0;
-    sessionWrongQuestions = []; // 🌟 セッションの間違い履歴をリセット
+    sessionWrongQuestions = []; 
 
-    // 画面遷移
+    // UI切り替え
     document.getElementById("portal-screen").classList.remove("active");
     document.getElementById("quiz-screen").classList.add("active");
+    document.getElementById("history-panel").style.display = "block";
+    document.getElementById("vs-result-details").style.display = "none";
+    document.getElementById("result-mode-title").textContent = "演習終了";
     
-    // 表示更新
     const subjectText = document.querySelector(`#subject-selector [data-subject="${selectedSubject}"]`).textContent;
     document.getElementById("quiz-title-display").textContent = `科目: ${subjectText}`;
 
     showQuestion();
   }
 
-  // 問題表示
   function showQuestion() {
-    // フィードバック領域を隠し、〇×ボタンを有効化
     document.getElementById("feedback-box").style.display = "none";
     toggleOXButtons(true);
 
@@ -910,18 +1261,15 @@
     
     const pct = (currentIdx / testPool.length) * 100;
     document.getElementById("progress-fill").style.width = `${pct}%`;
-
     document.getElementById("question-text").textContent = testPool[currentIdx].q;
   }
 
-  // 〇×ボタン制御
   function toggleOXButtons(enabled) {
     document.querySelectorAll(".ox-btn").forEach(btn => btn.disabled = !enabled);
   }
 
-  // 解答判定処理
   function handleAnswer(userAns) {
-    toggleOXButtons(false); // 重複クリック防止
+    toggleOXButtons(false); 
     
     const currentQ = testPool[currentIdx];
     const isCorrect = (userAns === currentQ.a);
@@ -929,7 +1277,6 @@
     if (isCorrect) {
       correctCount++;
     } else {
-      // 🌟 間違えた問題情報をプールに蓄積
       sessionWrongQuestions.push({
         q: currentQ.q,
         a: currentQ.a,
@@ -937,7 +1284,6 @@
       });
     }
 
-    // フィードバック表示の更新
     const fbBox = document.getElementById("feedback-box");
     const fbTitle = document.getElementById("feedback-title");
     const fbExpl = document.getElementById("explanation-text");
@@ -949,7 +1295,6 @@
     fbBox.style.display = "block";
   }
 
-  // 次へ進む、または終了処理
   function nextQuestion() {
     currentIdx++;
     if (currentIdx < testPool.length) {
@@ -959,12 +1304,306 @@
     }
   }
 
-  // 結果表示画面
+
+  // ===== 🌟 対戦モード：カウントダウン制御 =====
+  function startVsCountdown() {
+    const portal = document.getElementById("portal-screen");
+    const countdownOverlay = document.getElementById("countdown-overlay");
+    const countdownText = document.getElementById("countdown-text");
+    
+    portal.classList.remove("active");
+    countdownOverlay.style.display = "flex";
+    
+    let count = 5;
+    countdownText.textContent = count;
+    
+    const interval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        countdownText.textContent = count;
+      } else if (count === 0) {
+        countdownText.textContent = "START!";
+      } else {
+        clearInterval(interval);
+        countdownOverlay.style.display = "none";
+        initVsGame();
+      }
+    }, 1000);
+  }
+
+  // ===== 🌟 対戦モード：ゲームボード初期化 =====
+  function initVsGame() {
+    // 常に10問に限定
+    let poolP1 = [...masterQuestions];
+    let poolP2 = [...masterQuestions];
+
+    // それぞれ問題順序をランダムシャッフル（同じ問題を違う順で解く、または同じ順で競う）
+    // フェアにするために「同一の10問リストを同一の順序（ランダム順）」で提供します。
+    for (let i = poolP1.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [poolP1[i], poolP1[j]] = [poolP1[j], poolP1[i]];
+    }
+    poolP1 = poolP1.slice(0, 10);
+    poolP2 = [...poolP1]; // プレイヤー2も全く同じ順番で解答
+
+    const subjectText = document.querySelector(`#subject-selector [data-subject="${selectedSubject}"]`).textContent;
+
+    // プレイヤー1状態リセット
+    p1.questions = poolP1;
+    p1.idx = 0;
+    p1.answers = [];
+    p1.correctCount = 0;
+    p1.finished = false;
+    p1.finishTime = null;
+    document.getElementById("p1-subject-title").textContent = `科目: ${subjectText}`;
+    document.getElementById("p1-waiting").style.display = "none";
+
+    // プレイヤー2状態リセット
+    p2.questions = poolP2;
+    p2.idx = 0;
+    p2.answers = [];
+    p2.correctCount = 0;
+    p2.finished = false;
+    p2.finishTime = null;
+    document.getElementById("p2-subject-title").textContent = `科目: ${subjectText}`;
+    document.getElementById("p2-waiting").style.display = "none";
+
+    // 表示反映
+    updateVsQuestion(1);
+    updateVsQuestion(2);
+
+    // 画面切り替え
+    document.getElementById("main-header").style.display = "none";
+    document.getElementById("vs-game-container").style.display = "flex";
+
+    // 1分間タイマースタート
+    vsTimeLeft = 60.0;
+    vsStartTime = Date.now();
+    document.getElementById("vs-timer-text").textContent = vsTimeLeft.toFixed(1);
+    document.getElementById("vs-timer-bar").style.width = "100%";
+
+    if (vsTimer) clearInterval(vsTimer);
+    
+    vsTimer = setInterval(() => {
+      const elapsed = (Date.now() - vsStartTime) / 1000;
+      vsTimeLeft = 60.0 - elapsed;
+      
+      if (vsTimeLeft <= 0) {
+        vsTimeLeft = 0;
+        document.getElementById("vs-timer-text").textContent = "0.0";
+        document.getElementById("vs-timer-bar").style.width = "0%";
+        clearInterval(vsTimer);
+        endVsGame(true); // タイムアップ終了
+      } else {
+        document.getElementById("vs-timer-text").textContent = vsTimeLeft.toFixed(1);
+        document.getElementById("vs-timer-bar").style.width = `${(vsTimeLeft / 60.0) * 100}%`;
+      }
+    }, 100);
+  }
+
+  // 対戦画面の問題・進捗更新
+  function updateVsQuestion(playerNum) {
+    const p = (playerNum === 1) ? p1 : p2;
+    const progressEl = document.getElementById(`p${playerNum}-progress`);
+    const qCardEl = document.getElementById(`p${playerNum}-question-card`);
+
+    if (p.idx < p.questions.length) {
+      progressEl.textContent = `${p.idx + 1} / ${p.questions.length} 問`;
+      qCardEl.textContent = p.questions[p.idx].q;
+    } else {
+      // 解答終了
+      p.finished = true;
+      if (!p.finishTime) {
+        p.finishTime = Date.now();
+      }
+      document.getElementById(`p${playerNum}-waiting`).style.display = "flex";
+      
+      // 両者完了チェック
+      if (p1.finished && p2.finished) {
+        clearInterval(vsTimer);
+        endVsGame(false); // 全解答完了
+      }
+    }
+  }
+
+  // 🌟 対戦の解答判定
+  function handleVsAnswer(playerNum, userAns) {
+    const p = (playerNum === 1) ? p1 : p2;
+    if (p.finished || p.idx >= p.questions.length) return;
+
+    const currentQ = p.questions[p.idx];
+    const isCorrect = (userAns === currentQ.a);
+    const timeStamp = Date.now();
+
+    if (isCorrect) {
+      p.correctCount++;
+    }
+
+    // 各回答結果をストック
+    p.answers.push({
+      qIdx: p.idx,
+      userAns: userAns,
+      isCorrect: isCorrect,
+      timestamp: timeStamp
+    });
+
+    // 瞬間的な正誤フラッシュ演出
+    const areaEl = document.getElementById(`p${playerNum}-area`);
+    const flashClass = isCorrect ? "flash-correct" : "flash-wrong";
+    areaEl.classList.add(flashClass);
+    setTimeout(() => {
+      areaEl.classList.remove(flashClass);
+    }, 150);
+
+    p.idx++;
+    updateVsQuestion(playerNum);
+  }
+
+  // ===== 🌟 対戦終了と勝敗判定 =====
+  function endVsGame(isTimeout = false) {
+    document.getElementById("vs-game-container").style.display = "none";
+    document.getElementById("main-header").style.display = "block";
+    
+    // 結果表示の準備
+    document.getElementById("quiz-screen").classList.remove("active");
+    document.getElementById("result-screen").classList.add("active");
+    document.getElementById("history-panel").style.display = "none"; // 対戦時は個人の履歴履歴は非表示
+    document.getElementById("vs-result-details").style.display = "block";
+
+    document.getElementById("result-mode-title").textContent = "⚔️ 対戦結果 ⚔️";
+
+    const p1Score = p1.correctCount;
+    const p2Score = p2.correctCount;
+
+    // 経過時間計算
+    const p1Duration = p1.finishTime ? (p1.finishTime - vsStartTime) / 1000 : 60.0;
+    const p2Duration = p2.finishTime ? (p2.finishTime - vsStartTime) / 1000 : 60.0;
+
+    let winner = 0; // 0: 引き分け, 1: P1, 2: P2
+    let winReason = "";
+
+    if (p1Score > p2Score) {
+      winner = 1;
+      winReason = "正解数でプレイヤー1の勝利！";
+    } else if (p2Score > p1Score) {
+      winner = 2;
+      winReason = "正解数でプレイヤー2の勝利！";
+    } else {
+      // 同点の場合のスピード判定
+      if (!isTimeout) {
+        // 共に10問解き終えている場合：合計タイム勝負
+        if (p1Duration < p2Duration) {
+          winner = 1;
+          winReason = `同点ですが、解答完了が ${ (p2Duration - p1Duration).toFixed(1) } 秒早かったプレイヤー1の勝利！`;
+        } else if (p2Duration < p1Duration) {
+          winner = 2;
+          winReason = `同点ですが、解答完了が ${ (p1Duration - p2Duration).toFixed(1) } 秒早かったプレイヤー2の勝利！`;
+        } else {
+          winner = 0;
+          winReason = "同点かつ完全に同時に終わったため、引き分け！";
+        }
+      } else {
+        // タイムアウト時に同点だった場合
+        // 解答した最新問題の完了タイムスタンプが早い方が勝ち
+        const p1LastAns = p1.answers[p1.answers.length - 1];
+        const p2LastAns = p2.answers[p2.answers.length - 1];
+
+        if (p1.idx > p2.idx) {
+          winner = 1;
+          winReason = "同点ですが、より多くの問題を解き進めていたプレイヤー1の勝利！";
+        } else if (p2.idx > p1.idx) {
+          winner = 2;
+          winReason = "同点ですが、より多くの問題を解き進めていたプレイヤー2の勝利！";
+        } else if (p1LastAns && p2LastAns) {
+          // 同一問題数で同点の場合、最後の解答を先に送信したプレイヤーの勝ち
+          if (p1LastAns.timestamp < p2LastAns.timestamp) {
+            winner = 1;
+            winReason = "同点ですが、最新解答のペースが早かったプレイヤー1の勝利！";
+          } else if (p2LastAns.timestamp < p1LastAns.timestamp) {
+            winner = 2;
+            winReason = "同点ですが、最新解答のペースが早かったプレイヤー2の勝利！";
+          } else {
+            winner = 0;
+            winReason = "同点かつタイムアップのため、引き分け！";
+          }
+        } else {
+          winner = 0;
+          winReason = "両者未解答のまま時間切れとなりました（引き分け）。";
+        }
+      }
+    }
+
+    // UI出力
+    const scoreTitleEl = document.getElementById("result-pct");
+    const evalEl = document.getElementById("result-title");
+    const subEl = document.getElementById("result-sub");
+
+    if (winner === 1) {
+      scoreTitleEl.innerHTML = `<span class="text-green-400">P1 WIN!</span>`;
+      evalEl.textContent = `👑 プレイヤー1の勝利`;
+    } else if (winner === 2) {
+      scoreTitleEl.innerHTML = `<span class="text-blue-400">P2 WIN!</span>`;
+      evalEl.textContent = `👑 プレイヤー2の勝利`;
+    } else {
+      scoreTitleEl.innerHTML = `<span class="text-gray-400">DRAW</span>`;
+      evalEl.textContent = `🤝 引き分け`;
+    }
+
+    subEl.innerHTML = `
+      <div class="flex justify-around text-sm border-t border-b border-slate-700 py-3 my-2 max-w-md mx-auto">
+        <div>
+          <p class="font-bold text-green-400">プレイヤー1</p>
+          <p class="text-lg font-bold">${p1Score} / 10問 正解</p>
+          <p class="text-xs text-gray-400">タイム: ${p1Duration.toFixed(1)} 秒</p>
+        </div>
+        <div class="border-r border-slate-700"></div>
+        <div>
+          <p class="font-bold text-blue-400">プレイヤー2</p>
+          <p class="text-lg font-bold">${p2Score} / 10問 正解</p>
+          <p class="text-xs text-gray-400">タイム: ${p2Duration.toFixed(1)} 秒</p>
+        </div>
+      </div>
+      <p class="text-yellow-400 font-bold mt-2 text-sm">${winReason}</p>
+    `;
+
+    // 対戦解答一覧詳細を生成
+    const summaryRowsContainer = document.getElementById("vs-summary-rows");
+    summaryRowsContainer.innerHTML = "";
+
+    p1.questions.forEach((qItem, idx) => {
+      const p1AnsObj = p1.answers.find(a => a.qIdx === idx);
+      const p2AnsObj = p2.answers.find(a => a.qIdx === idx);
+
+      const p1Text = p1AnsObj 
+        ? `${p1AnsObj.userAns} (${p1AnsObj.isCorrect ? '○' : '×'})` 
+        : "未解答";
+      const p1BadgeClass = p1AnsObj 
+        ? (p1AnsObj.isCorrect ? 'badge-correct' : 'badge-wrong') 
+        : 'bg-gray-600';
+
+      const p2Text = p2AnsObj 
+        ? `${p2AnsObj.userAns} (${p2AnsObj.isCorrect ? '○' : '×'})` 
+        : "未解答";
+      const p2BadgeClass = p2AnsObj 
+        ? (p2AnsObj.isCorrect ? 'badge-correct' : 'badge-wrong') 
+        : 'bg-gray-600';
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="text-gray-400 font-bold">Q${idx + 1}</td>
+        <td class="text-left text-white font-semibold text-xs py-2">${escapeHtml(qItem.q)}<br><span class="text-[10px] text-gray-400 font-normal">正解: ${qItem.a}</span></td>
+        <td><span class="badge ${p1BadgeClass}">${p1Text}</span></td>
+        <td><span class="badge ${p2BadgeClass}">${p2Text}</span></td>
+      `;
+      summaryRowsContainer.appendChild(row);
+    });
+  }
+
+  // ===== 通常結果画面表示 =====
   function showResult() {
     document.getElementById("quiz-screen").classList.remove("active");
     document.getElementById("result-screen").classList.add("active");
 
-    // 進捗バーを100%に
     document.getElementById("progress-fill").style.width = "100%";
 
     const pct = Math.round((correctCount / testPool.length) * 100);
@@ -973,7 +1612,6 @@
     let title = "";
     let sub = `正解数: ${correctCount} / ${testPool.length} 問`;
 
-    // 客観的かつ段階的なスコア評価
     if (pct >= 90) { title = "優秀（合格圏内）"; }
     else if (pct >= 70) { title = "良好（標準レベル）"; }
     else if (pct >= 50) { title = "要復習（知識定着不足）"; }
@@ -982,7 +1620,6 @@
     document.getElementById("result-title").textContent = title;
     document.getElementById("result-sub").textContent = sub;
 
-    // 得点記録を保存（🌟 間違えた問題リスト wrongQuestions も追加）
     const subjectLabel = document.querySelector(`#subject-selector [data-subject="${selectedSubject}"]`)?.textContent || selectedSubject;
     saveHistoryRecord({
       date: new Date().toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }),
@@ -990,7 +1627,7 @@
       correct: correctCount,
       total: testPool.length,
       pct: pct,
-      wrongQuestions: [...sessionWrongQuestions] // 🌟 保存
+      wrongQuestions: [...sessionWrongQuestions] 
     });
     renderHistory();
   }
@@ -1004,7 +1641,11 @@
   // 同じ条件でリトライ
   function retryQuiz() {
     document.getElementById("result-screen").classList.remove("active");
-    initQuizPool();
+    if (isVsMode) {
+      startVsCountdown();
+    } else {
+      initQuizPool();
+    }
   }
 </script>
 </body>
